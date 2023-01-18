@@ -1,0 +1,10 @@
+.header_logo {
+    display: flex;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.87);
+    text-decoration: none;
+  }
+  .main_contents {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+  }
