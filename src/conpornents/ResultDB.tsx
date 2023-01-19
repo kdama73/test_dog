@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
@@ -8,25 +8,17 @@ import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { ListItemButton } from '@mui/material';
 import styles from './ResultDB.module.css'
+import { DOGDATA } from '../interfaces/dogData.interface';
 
-interface DogProps {
-        id: string;
-        refId: string;
-        enDescription: string;
-        enName: string;
-        jpDescription: string;
-        jpName: string;
-        jpSiteUrl: string;
-        iDogUrl: string;
-        relatedGene: string;
-        relatedGeneUrl: string;
-        dogBreed: string;
-}
-
-const ResultDB: React.FC<DogProps> = (props) => {
+const ResultDB: React.FC<DOGDATA> = (props) => {
+  useEffect(() => {
+    
+  })
   return (
     <div>
+      
       <>
+      {console.log(props)}
       <ListItem alignItems="flex-start" disablePadding>
         <ListItemButton>
         <ListItemText className={styles.list_text}
