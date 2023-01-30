@@ -10,9 +10,10 @@ import {
   limit,
 } from 'firebase/firestore';
 import ResultDB from './ResultDB';
+import { Paginate } from './Paginate';
 import { DOGDATA } from '../interfaces/dogData.interface';
 import { jpNameArray } from '../searchKeywords/jpName';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import {
   Typography,
   List,
@@ -28,6 +29,9 @@ const Search: React.FC = () => {
   const [dogDatas, setDogdatas] = useState<DOGDATA[]>([]);
   const [searchData, setSearchData] = useState<DOGDATA>();
   const [isFormInputted, setIsFormInputted] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const displayLimit = 20;
+  const total = Math.ceil(805/displayLimit) //805はデータの総数
 
   const setSearchText = async (keyword: string | null) => {
     const dogDatasRef = collection(db, 'dogDatas');
@@ -124,8 +128,8 @@ const Search: React.FC = () => {
     <>
       <AppBar position="fixed" color="inherit">
         <Toolbar>
-            <PetsIcon sx={{ marginRight: '12px' }} />
-            <Link className={styles.logo} to="/">
+          <PetsIcon sx={{ marginRight: '12px' }} />
+          <Link className={styles.logo} to="/">
             <Typography
               variant="h6"
               component="div"
@@ -138,10 +142,10 @@ const Search: React.FC = () => {
             >
               DogDoc
             </Typography>
-            </Link>
-
+          </Link>
         </Toolbar>
       </AppBar>
+
       <Container fixed sx={{ paddingTop: '80px' }}>
         <div className={styles.contens_wrap}>
           <List
@@ -159,25 +163,29 @@ const Search: React.FC = () => {
             </>
           </List>
 
-          <Autocomplete
-            disablePortal
-            noOptionsText="一致する病名がありません"
-            id="combo-box-demo"
-            options={[...jpNameArray]}
-            sx={{ width: '100%' }}
-            onChange={(_, newValue, reason) => {
-              reason === 'clear' && newValue === null
-                ? setIsFormInputted(true)
-                : setIsFormInputted(false);
-              {
-                isFormInputted
-                  ? setSearchText(newValue)
-                  : setSearchData(undefined);
-              }
-            }}
-            renderInput={(params) => <TextField {...params} label="病名" />}
-          />
+          <div>
+            <Autocomplete
+              disablePortal
+              noOptionsText="一致する病名がありません"
+              id="combo-box-demo"
+              options={[...jpNameArray]}
+              sx={{ width: '100%' }}
+              onChange={(_, newValue, reason) => {
+                reason === 'clear' && newValue === null
+                  ? setIsFormInputted(true)
+                  : setIsFormInputted(false);
+                {
+                  isFormInputted
+                    ? setSearchText(newValue)
+                    : setSearchData(undefined);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} label="病名" />}
+            />
+            <li> <a href="https://ngdc.cncb.ac.cn/idog/index.jsp">iDog</a></li>
+          </div>
         </div>
+        <Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} total={total}/>
       </Container>
     </>
   );
