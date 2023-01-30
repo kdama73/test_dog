@@ -7,7 +7,7 @@ import React from 'react';
 import { DOGDATA } from '../interfaces/dogData.interface';
 import styles from './ResultDB.module.css';
 
-const ResultDB: React.FC<DOGDATA> = (props) => {
+const ResultDB: React.FC<Pick<DOGDATA, "id" | "jpName" | "jpDescription" | "enDescription" | "refId">> = (props) => {
   return (
     <div>
       
@@ -15,7 +15,7 @@ const ResultDB: React.FC<DOGDATA> = (props) => {
       <ListItem alignItems="flex-start" disablePadding>
         <ListItemButton>
         <ListItemText className={styles.list_text}
-          primary={props.jpName}
+          primary={props.jpName+props.refId}
           secondary={
             <React.Fragment>
               <Typography

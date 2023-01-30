@@ -8,12 +8,14 @@ import {
   where,
   getDocs,
   limit,
+  orderBy,
+  startAfter,
 } from 'firebase/firestore';
 import ResultDB from './ResultDB';
 import { Paginate } from './Paginate';
 import { DOGDATA } from '../interfaces/dogData.interface';
 import { jpNameArray } from '../searchKeywords/jpName';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Typography,
   List,
@@ -26,12 +28,14 @@ import {
 import PetsIcon from '@mui/icons-material/Pets';
 
 const Search: React.FC = () => {
-  const [dogDatas, setDogdatas] = useState<DOGDATA[]>([]);
-  const [searchData, setSearchData] = useState<DOGDATA>();
+  const [dogDatas, setDogdatas] = useState<Pick<DOGDATA, "id" | "jpName" | "jpDescription" | "enDescription" | "refId">[]>([]);
+  const [searchData, setSearchData] = useState<Pick<DOGDATA, "id" | "jpName" | "jpDescription" | "enDescription" | "refId">>();
   const [isFormInputted, setIsFormInputted] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams] = useSearchParams();
   const displayLimit = 20;
   const total = Math.ceil(805/displayLimit) //805はデータの総数
+  const navigate = useNavigate();
 
   const setSearchText = async (keyword: string | null) => {
     const dogDatasRef = collection(db, 'dogDatas');
@@ -43,14 +47,8 @@ const Search: React.FC = () => {
         id: doc.data().id,
         refId: doc.data().refId,
         enDescription: doc.data().enDescription,
-        enName: doc.data().enName,
         jpDescription: doc.data().jpDescription,
         jpName: doc.data().jpName,
-        jpSiteUrl: doc.data().jpSiteUrl,
-        iDogUrl: doc.data().iDogUrl,
-        relatedGene: doc.data().relatedGene,
-        relatedGeneUrl: doc.data().relatedGeneUrl,
-        dogBreed: doc.data().dogBreed,
       });
     });
   };
@@ -99,30 +97,34 @@ const Search: React.FC = () => {
   //       });
   //   });
   // };
+  const setDogDataPerPage= async (init?: boolean) => {
+    if (init) {
+      setCurrentPage(1);
+    }
+    const order = ("0000"+(currentPage-1)*displayLimit).slice(-4)
+    const q = query(collection(db, 'dogDatas'), limit(displayLimit) ,orderBy("refId"), startAfter("DDID"+order));
+    const currentDatas = await getDocs(q);
+    setDogdatas(
+      currentDatas.docs.map((doc) => ({
+        id: doc.data().id,
+        refId: doc.data().refId,
+        enDescription: doc.data().enDescription,
+        jpDescription: doc.data().jpDescription,
+        jpName: doc.data().jpName,
+      })))
+  }
 
   useEffect(() => {
-    const q = query(collection(db, 'dogDatas'), limit(5));
-    const unSub = onSnapshot(q, (snapshot) => {
-      setDogdatas(
-        snapshot.docs.map((doc) => ({
-          id: doc.data().id,
-          refId: doc.data().refId,
-          enDescription: doc.data().enDescription,
-          enName: doc.data().enName,
-          jpDescription: doc.data().jpDescription,
-          jpName: doc.data().jpName,
-          jpSiteUrl: doc.data().jpSiteUrl,
-          iDogUrl: doc.data().iDogUrl,
-          relatedGene: doc.data().relatedGene,
-          relatedGeneUrl: doc.data().relatedGeneUrl,
-          dogBreed: doc.data().dogBreed,
-        }))
-      );
-    });
-    return () => {
-      unSub();
-    };
-  }, []);
+    const queryParams = Number(searchParams.get("page"));
+    if (searchParams.get("page") === null) {
+      setDogDataPerPage(true);
+    } else if (queryParams > total || !queryParams) {
+      navigate("/notfound");
+    }
+    setCurrentPage(queryParams);
+    setDogDataPerPage();
+  window.scrollTo({top: 0});
+  }, [currentPage]);
 
   return (
     <>
@@ -185,7 +187,7 @@ const Search: React.FC = () => {
             <li> <a href="https://ngdc.cncb.ac.cn/idog/index.jsp">iDog</a></li>
           </div>
         </div>
-        <Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} total={total}/>
+        {isFormInputted && (<Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} total={total}/>)}
       </Container>
     </>
   );
