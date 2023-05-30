@@ -155,6 +155,7 @@ const Search: React.FC = () => {
               bgcolor: 'background.paper',
               marginRight: '24px',
             }}
+            
           >
             <>
               {searchData !== undefined ? (
